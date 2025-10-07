@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Online Course Registration</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #4facfe, #00f2fe);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      color: white;
+      text-shadow: 1px 1px 2px #333;
+      margin-top: 30px;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      width: 90%;
+      max-width: 500px;
+      margin-top: 20px;
+    }
+    label { display: block; margin-top: 10px; font-weight: bold; }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 8px;
+      margin-top: 15px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 16px;
+    }
+    button:hover { background-color: #0056b3; }
+    #adminPanel {
+      display: none;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 5px 10px rgba(0,0,0,0.2);
+      margin-top: 30px;
+      width: 90%;
+      max-width: 700px;
+    }
+    table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #007bff; color: white; }
+    .action-btn {
+      padding: 6px 10px; border: none; border-radius: 5px; cursor: pointer;
+    }
+    .accept { background-color: #28a745; color: white; }
+    .reject { background-color: #dc3545; color: white; }
+  </style>
+</head>
+<body>
+  <h1>Online Course Registration</h1>
+  <div class="container">
+    <form id="courseForm">
+      <label for="name">Full Name:</label>
+      <input type="text" id="name" required>
+
+      <label for="email">Email:</label>
+      <input type="email" id="email" required>
+
+      <label for="phone">Phone:</label>
+      <input type="text" id="phone" required>
+
+      <label for="course">Select Course:</label>
+      <select id="course">
+        <option>Course English Spoken</option>
+        <option>Custom Web Development</option>
+        <option>Responsive Web Design</option>
+        <option>E-commerce Development</option>
+        <option>Website Maintenance & Support</option>
+        <option>Social Media Marketing</option>
+        <option>YouTube Thumbnail Design</option>
+        <option>Business Logo Design</option>
+        <option>Boost Your Social Media Accounts</option>
+        <option>HTML Course</option>
+        <option>AI Voice Generation</option>
+        <option>Killer Prompt Engineering</option>
+        <option>AI Video Creation</option>
+        <option>Custom Logo Design</option>
+        <option>Poster & Banner Designs</option>
+        <option>AI Image Creation</option>
+        <option>Other (Write in message)</option>
+      </select>
+
+      <label for="message">Message:</label>
+      <textarea id="message" rows="4"></textarea>
+
+      <button type="submit">Submit Registration</button>
+    </form>
+  </div>
+
+  <div class="container" style="margin-top: 20px;">
+    <button onclick="openAdminLogin()">Admin Login</button>
+  </div>
+
+  <div id="adminPanel">
+    <h2>Admin Dashboard</h2>
+    <button onclick="exportCSV()">Export CSV</button>
+    <table>
+      <thead>
+        <tr><th>Name</th><th>Email</th><th>Phone</th><th>Course</th><th>Message</th><th>Action</th></tr>
+      </thead>
+      <tbody id="registrationsList"></tbody>
+    </table>
+  </div>
+
+  <script>
+    const form = document.getElementById('courseForm');
+    const registrationsList = document.getElementById('registrationsList');
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const data = {
+        name: name.value,
+        email: email.value,
+        phone: phone.value,
+        course: course.value,
+        message: message.value,
+        status: 'Pending'
+      };
+      let registrations = JSON.parse(localStorage.getItem('registrations') || '[]');
+      registrations.push(data);
+      localStorage.setItem('registrations', JSON.stringify(registrations));
+      alert('Registration submitted successfully!');
+      form.reset();
+    });
+
+    function openAdminLogin() {
+      const pass = prompt('Enter admin password:');
+      if (pass === 'admin123') {
+        loadAdminPanel();
+        document.getElementById('adminPanel').style.display = 'block';
+      } else {
+        alert('Incorrect password!');
+      }
+    }
+
+    function loadAdminPanel() {
+      registrationsList.innerHTML = '';
+      let registrations = JSON.parse(localStorage.getItem('registrations') || '[]');
+      registrations.forEach((r, index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${r.name}</td>
+          <td><a href="mailto:${r.email}">${r.email}</a></td>
+          <td>${r.phone}</td>
+          <td>${r.course}</td>
+          <td>${r.message}</td>
+          <td>
+            <button class='action-btn accept' onclick='accept(${index})'>Accept</button>
+            <button class='action-btn reject' onclick='reject(${index})'>Reject</button>
+          </td>
+        `;
+        registrationsList.appendChild(row);
+      });
+    }
+
+    function accept(index) {
+      let regs = JSON.parse(localStorage.getItem('registrations') || '[]');
+      if (regs[index]) {
+        regs[index].status = 'Accepted';
+        localStorage.setItem('registrations', JSON.stringify(regs));
+        loadAdminPanel();
+        alert('Registration accepted! Use mailto link to contact the student.');
+      }
+    }
+
+    function reject(index) {
+      let regs = JSON.parse(localStorage.getItem('registrations') || '[]');
+      if (regs[index]) {
+        regs[index].status = 'Rejected';
+        localStorage.setItem('registrations', JSON.stringify(regs));
+        loadAdminPanel();
+        alert('Registration rejected.');
+      }
+    }
+
+    function exportCSV() {
+      let registrations = JSON.parse(localStorage.getItem('registrations') || '[]');
+      let csv = 'Name,Email,Phone,Course,Message\n';
+      registrations.forEach(r => {
+        csv += `${r.name},${r.email},${r.phone},${r.course},${r.message}\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'registrations.csv';
+      link.click();
+    }
+  </script>
+</body>
+</html>
